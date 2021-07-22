@@ -1,0 +1,134 @@
+import pygame as pg
+from pygame.locals import *
+import sys
+from functions import *
+import time
+import random
+
+# Initializing pygame, music and font
+pg.font.init()
+pg.font.init()
+pg.mixer.init()
+
+# Start the music
+music_player('C:\\Users\\kbadmin\\Documents\\Youtube\\audio\\Solomun-The-way-back.mp3')
+
+# Create a screen
+screen = pg.display.set_mode((600, 400))
+
+# Import the screen image
+background = pg.image.load('C:\\Users\\kbadmin\\Documents\\Youtube\\audio\\snake-game.jpg')
+
+# Transform the image to the size of screen
+background = pg.transform.scale(background, (600, 400)) 
+
+# Defining colors
+black = (0, 0, 0) # Black
+grey = (105,105,105) # Grey
+green = (34, 145, 43) # Green
+red = (209, 58, 54) # Red
+yellow = (255, 255, 0) # Yellow
+
+# Defining positions variables
+xfood = random.randrange(1, 600, 1)
+yfood = random.randrange(1, 400, 1)
+
+
+
+display_menu = True
+xsnake = 300
+ysnake = 200
+xmove = 0
+ymove = 0
+speed = pg.time.Clock()
+score = 0
+movement = ''
+
+# Keep the program open/working
+while True:
+    # Run for all the events happening inside of script
+    for event in pg.event.get():
+        # If the close buttom is pressed
+        if event.type == pg.QUIT:
+            sys.exit()
+        # Movement of snake made by keyboard arrows
+        if event.type == pg.KEYDOWN and display_menu == False:
+            if event.key == pg.K_UP and ymove == 0:
+                ymove = -5
+                xmove = 0
+            if event.key == pg.K_DOWN and ymove == 0:
+                ymove = 5 
+                xmove = 0
+            if event.key == pg.K_LEFT and xmove == 0:
+                ymove = 0
+                xmove = -5
+            if event.key == pg.K_RIGHT and xmove == 0: 
+                ymove = 0
+                xmove = 5
+
+    if display_menu == True:
+
+        # Insert background
+        screen.blit(background,(0,0))
+        # Insert PLAY button
+        game_font = pg.font.Font('C:\\Users\\kbadmin\Desktop\pygame\\VCR_OSD_MONO_1.001.ttf', 40)
+        play_button = pg.Rect((470, 300, 110, 60))
+        play_button_font = game_font.render('PLAY', True, red)
+        play_rect = play_button_font.get_rect()
+        screen.blit(play_button_font, (480, 311))
+        
+        # Getting the mouse position
+        mouse = pg.mouse.get_pos()
+        # If the mouse pass under the PLAY button change the color ( x + width > mouse position x > position x)
+        if 470 + 110 > mouse[0] > 470 and 300 + 60 > mouse[1] > 330:
+            pg.draw.rect(background, yellow, (470, 300, 110, 60))
+        else:
+            pg.draw.rect(background, black, (470, 300, 110, 60))       
+
+        # Check if PLAY button is clicked
+        click = pg.mouse.get_pressed()
+        
+        # Starts the game if the PLAY button is clicked
+        if click[0] == 1:
+            mouse = pg.mouse.get_pos()
+            if play_button.collidepoint(mouse):
+                display_menu = False
+                score = 0            
+
+    else:
+        # Starting the game
+        screen.fill(grey)
+        ysnake += ymove
+        xsnake += xmove
+
+        # Draw a score in the left side of the screen
+        score_font = pg.font.Font('C:\\Users\\kbadmin\Desktop\pygame\\VCR_OSD_MONO_1.001.ttf', 20)
+        score_counter = score_font.render(f'Score:{score}', True, black)
+        screen.blit(score_counter, (10, 10))
+
+        # Drawing the snake
+        snake = pg.draw.rect(screen, black,(xsnake, ysnake, 10, 10))
+        
+        # Drawing the food 
+        food = pg.draw.rect(screen, red,(xfood, yfood, 10, 10))
+
+        # Snake speed
+        speed.tick(25)
+
+        # When the snake touch the food
+        if (xsnake > xfood - 10 and  xsnake < xfood + 10) and (ysnake > yfood - 10 and  ysnake < yfood + 10):
+            # Redefining food variables of positions
+            xfood = random.randrange(1, 600, 1)
+            yfood = random.randrange(1, 400, 1)
+            score += 1
+
+        # End the game if the snake touches the wall
+        if (xsnake < 0 or xsnake > 600) or (ysnake > 400 or ysnake < 0):            
+            xsnake = 300
+            ysnake = 200
+
+            # Returns to the initial page
+            display_menu = True
+
+        pg.display.update()
+    pg.display.update()
